@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h1>Event Gallery</h1>
+
+    <!-- form for adding new photos -->
+    <section id="upload-section">
+        <h2>Add a Photo</h2>
+        <form id="photoForm">
+            <label for="photo-url">Image URL:</label>
+            <input type="url" id="photo-url" placeholder="https://example.com/photo.jpg" required>
+            <button type="submit">Add Photo</button>
+        </form>
+        <p id="upload-message" style="color:green;display:none;">Photo added!</p>
+    </section>
+
+    <img id="loading" src="raviback.jpg">
+
+    <!-- gallery grid -->
+    <section id="gallery" class="gallery-grid">
+        <!-- images will be injected here -->
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

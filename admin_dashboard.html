@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Bookings</title>
+    <link rel="stylesheet" href="admin.css">
+        
+</head>
+<body class="background">
+    <nav>
+        <ul class="navbar">
+            <li><a href="index.html">Home</a></li>
+            <div class="login">
+                <li class="adminlog" style="display: non;"><a href="admin-login.html" >Admin Login</a></li>
+            </div>
+        </ul>
+    </nav>
+    
+    <div>
+        <center>
+        <h1>Admin Dashboard</h1>
+        </center>
+    </div>
+    <div class="admin-container">
+        <div class="dashboard-header">
+            <h2>📋 Booking Management</h2>
+            <div>
+                <span class="booking-count"><a href="admin_dashboard.html">Total Bookings: <span id="bookingCount">0</span></a></span>
+                <button class="messages-btn" onclick="switchToMessages()" style="margin-right: 10px;">💬 Messages</button>
+                <button class="clear-btn" onclick="clearAllBookings()">Clear All Bookings</button>
+            </div>
+        </div>
+        
+        <table class="bookings-table" id="bookingsTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Event Type</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Event Date</th>
+                    <th>Event Time</th>
+                    <th>Message</th>
+                    <th>Submitted At</th>
+                    <th>Action</th>
+                    <th>Email Client</th>
+                </tr>
+            </thead>
+            <tbody id="bookingsBody">
+            </tbody>
+        </table>
+        <div id="noBookings" class="no-bookings">No bookings yet. <a href="index.html">Go back and make a booking!</a></div>
+
+        <!-- Calendar block (added below booking management) -->
+        <div id="calendar" class="calendar" aria-label="Booking calendar">
+            <div class="calendar-header">
+                <button id="prevMonthBtn" aria-label="Previous month">&lt;</button>
+                <h3 id="monthYear"></h3>
+                <button id="nextMonthBtn" aria-label="Next month">&gt;</button>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <div class="day-name">Sun</div><div class="day-name">Mon</div><div class="day-name">Tue</div>
+                <div class="day-name">Wed</div><div class="day-name">Thu</div><div class="day-name">Fri</div><div class="day-name">Sat</div>
+                <!-- date cells injected here by JS -->
+            </div>
+
+            <div id="dateBookings" class="date-bookings" aria-live="polite"></div>
+        </div>
+
+        <!-- Messages Section (below calendar) -->
+        <div id="messagesSection" class="messages-section" style="display: none;">
+            <div class="messages-header">
+                <h2>💬 Messages</h2>
+                <div>
+                    <span class="messages-count">Total Messages: <span id="messagesCount">0</span></span>
+                    <button class="clear-btn" onclick="clearAllMessages()" style="margin-left: 10px;">Clear All Messages</button>
+                </div>
+            </div>
+            
+            <div class="messages-container" id="messagesContainer">
+                <div class="no-messages">No messages yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if admin is logged in
+        if (localStorage.getItem('adminLoggedIn') !== 'true') {
+            window.location.href = 'admin-login.html';
+        }
+
+        // Switch to Messages view
+        function switchToMessages() {
+            const bookingsSection = document.querySelector('.admin-container').firstChild;
+            const messagesSection = document.getElementById('messagesSection');
+            
+            // Hide bookings table and calendar
+            document.getElementById('bookingsTable').style.display = 'none';
+            document.getElementById('noBookings').style.display = 'none';
+            document.getElementById('calendar').style.display = 'none';
+            
+            // Show messages section
+            messagesSection.style.display = 'block';
+            
+            // Load messages
+            loadMessages();
+        }
+
+        // Switch back to Bookings view
+        function switchToBookings() {
+            const messagesSection = document.getElementById('messagesSection');
+            
+            // Show bookings
+            messagesSection.style.display = 'none';
+            document.getElementById('calendar').style.display = 'block';
+            loadBookings();
+        }
+
+        // Load and display all messages
+        function loadMessages() {
+            const messages = JSON.parse(localStorage.getItem('messages')) || [];
+            const container = document.getElementById('messagesContainer');
+            const messagesCount = document.getElementById('messagesCount');
+            
+            messagesCount.textContent = messages.length;
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="no-messages">No messages yet.</div>';
+                return;
+            }
+            
+            container.innerHTML = messages.map((msg, index) => `
+                <div class="message-card">
+                    <div class="message-header">
+                        <strong>#${index + 1} - ${msg.name}</strong>
+                        <button class="delete-msg-btn" onclick="deleteMessage(${msg.id})">Delete</button>
+                    </div>
+                    <div class="message-details">
+                        <p><strong>Email:</strong> ${msg.email}</p>
+                        <p><strong>Phone:</strong> ${msg.phone}</p>
+                        <p><strong>Message:</strong></p>
+                        <p class="message-text">${msg.messageText}</p>
+                        <small><strong>Submitted:</strong> ${msg.submittedAt}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Delete a specific message
+        function deleteMessage(id) {
+            if (confirm('Are you sure you want to delete this message?')) {
+                let messages = JSON.parse(localStorage.getItem('messages')) || [];
+                messages = messages.filter(msg => msg.id !== id);
+                localStorage.setItem('messages', JSON.stringify(messages));
+                loadMessages();
+            }
+        }
+
+        // Clear all messages
+        function clearAllMessages() {
+            if (confirm('⚠️ Are you sure you want to DELETE ALL MESSAGES? This cannot be undone.')) {
+                localStorage.removeItem('messages');
+                loadMessages();
+            }
+        }
+        
+        // Load and display all bookings when page opens
+        function loadBookings() {
+            // explicitly request from the API port so dashboard works even if the page is
+        // opened outside of the Express server.
+        fetch('http://localhost:5000/bookings')
+                .then(response => response.json())
+                .then(bookings => {
+                    const tbody = document.getElementById('bookingsBody');
+                    const noBookings = document.getElementById('noBookings');
+                    const bookingCount = document.getElementById('bookingCount');
+                    
+                    tbody.innerHTML = '';
+                    bookingCount.textContent = bookings.length;
+                    
+                    if (bookings.length === 0) {
+                        noBookings.style.display = 'block';
+                        document.getElementById('bookingsTable').style.display = 'none';
+                        return;
+                    }
+                    
+                    noBookings.style.display = 'none';
+                    document.getElementById('bookingsTable').style.display = 'table';
+                    
+                    // Display each booking as a table row
+                    bookings.forEach((booking, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td><strong>${booking['event-type'] || booking.eventType}</strong></td>
+                            <td>${booking.name}</td>
+                            <td>${booking.email}</td>
+                            <td>${booking.phone}</td>
+                            <td>${booking.date}</td>
+                            <td>${booking.time}</td>
+                            <td>${booking.message || '-'}</td>
+                            <td>${booking.submittedAt || new Date().toLocaleString()}</td>
+                            <td><button class="delete-btn" onclick="deleteBooking(${booking.id})">Delete</button></td>
+                            <td><button class="email-btn" onclick="emailClient('${booking.email}', ${booking.id})">Send Email</button></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading bookings:', error);
+                    alert('Error loading bookings. Make sure the server is running.');
+                });
+        }
+
+        // Delete a specific booking
+        function deleteBooking(id) {
+            alert('Delete functionality not implemented yet. Bookings are stored in server memory.');
+        }
+
+        // send email to client
+        function emailClient(email, bookingId) {
+            const subject = prompt('Subject for email to ' + email + ':', 'Your booking details');
+            if (!subject) return;
+            const text = prompt('Message body:', 'Thank you for your booking. We will contact you soon.');
+            if (text === null) return;
+
+            fetch('/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ to: email, subject, text })
+            })
+            .then(r => {
+                // if server responded with non-OK status try to read text
+                if (!r.ok) {
+                    return r.text().then(t => {
+                        throw new Error('status ' + r.status + ': ' + t);
+                    });
+                }
+                const ct = r.headers.get('content-type') || '';
+                if (ct.includes('application/json')) return r.json();
+                return r.text().then(t => {
+                    throw new Error('invalid JSON response:\n' + t);
+                });
+            })
+            .then(res => {
+                if (res.error) throw new Error(res.error);
+                alert('Email sent successfully');
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error sending email: ' + err.message);
+            });
+        }
+
+        // Clear all bookings
+        function clearAllBookings() {
+            alert('Clear functionality not implemented yet. Bookings are stored in server memory. Restart the server to clear.');
+        }
+
+        // Calendar script (added)
+        (function() {
+            const monthYearEl = document.getElementById('monthYear');
+            const calendarGrid = document.getElementById('calendarGrid');
+            const prevBtn = document.getElementById('prevMonthBtn');
+            const nextBtn = document.getElementById('nextMonthBtn');
+            const dateBookingsEl = document.getElementById('dateBookings');
+            let current = new Date();
+
+            function getBookings() {
+                // For now, return empty array since we can't synchronously fetch
+                // In a real app, this would need to be async
+                return [];
+            }
+
+            function formatMonthYear(d) {
+                return d.toLocaleString(undefined, { month: 'long', year: 'numeric' });
+            }
+
+            function yyyyMmDd(d) {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            }
+
+            function clearDateBookings() {
+                dateBookingsEl.innerHTML = '';
+            }
+
+            function showBookingsFor(dateStr) {
+                const bookings = getBookings().filter(b => b.date === dateStr);
+                if (bookings.length === 0) {
+                    dateBookingsEl.innerHTML = `<div class="item">No bookings for ${dateStr}.</div>`;
+                    return;
+                }
+                dateBookingsEl.innerHTML = bookings.map(b => 
+                    `<div class="item"><strong>${b.eventType}</strong> — ${b.name} (${b.phone}) at ${b.time || '-'}<br><small>${b.message || ''}</small></div>`
+                ).join('');
+            }
+
+            function renderCalendar() {
+                // remove existing date cells (keep day-name elements)
+                Array.from(calendarGrid.querySelectorAll('.date-cell')).forEach(n => n.remove());
+
+                const year = current.getFullYear();
+                const month = current.getMonth();
+                const firstDay = new Date(year, month, 1);
+                const startWeekday = firstDay.getDay(); // 0..6
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                monthYearEl.textContent = formatMonthYear(current);
+
+                // add blank cells for previous month's tail
+                for (let i = 0; i < startWeekday; i++) {
+                    const empty = document.createElement('div');
+                    empty.className = 'date-cell inactive';
+                    calendarGrid.appendChild(empty);
+                }
+
+                const bookings = getBookings();
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const cellDate = new Date(year, month, d);
+                    const dateStr = yyyyMmDd(cellDate);
+                    const cell = document.createElement('div');
+                    cell.className = 'date-cell';
+                    if (dateStr === yyyyMmDd(new Date())) cell.classList.add('today');
+
+                    // check if any booking exists for this date
+                    const has = bookings.some(b => b.date === dateStr);
+                    if (has) cell.classList.add('has-booking');
+
+                    cell.innerHTML = `<div class="date-num">${d}</div>`;
+                    cell.dataset.date = dateStr;
+
+                    // click to show bookings
+                    cell.addEventListener('click', function() {
+                        if (cell.classList.contains('inactive')) return;
+                        showBookingsFor(this.dataset.date);
+                    });
+
+                    calendarGrid.appendChild(cell);
+                }
+
+                clearDateBookings();
+            }
+
+            function prevMonth() { current.setMonth(current.getMonth() - 1); renderCalendar(); }
+            function nextMonth() { current.setMonth(current.getMonth() + 1); renderCalendar(); }
+
+            prevBtn.addEventListener('click', prevMonth);
+            nextBtn.addEventListener('click', nextMonth);
+
+            // re-render calendar when bookings change (simple approach: listen storage)
+            window.addEventListener('storage', renderCalendar);
+
+            // initial render once DOM is ready
+            document.addEventListener('DOMContentLoaded', renderCalendar);
+        })();
+
+        // Load bookings when page loads
+        document.addEventListener('DOMContentLoaded', loadBookings);
+    </script>
+</body>
+</html>
