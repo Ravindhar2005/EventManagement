@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 //const cors = require("cors"); // not needed when serving front‑end from same origin
 const path = require('path');
@@ -7,6 +8,23 @@ const app = express();
 // you can override with PORT environment variable if needed
 const PORT = process.env.PORT || 5000;
 
+// MySQL Database Connection
+const mysql = require('mysql2');
+const db = mysql.createConnection({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'EventManagement'
+});
+
+db.connect((err) => {
+  if (err) {
+    console.error('Database connection failed:', err);
+  } else {
+    console.log('Connected to MySQL Database');
+  }
+});
+
 /*app.use(cors({
     origin: "http://127.0.0.1:3000"
 }));*/
@@ -14,6 +32,8 @@ const PORT = process.env.PORT || 5000;
 
 // only parse JSON bodies; CORS is unnecessary since requests originate
 // from the same host/port that serves the HTML/JS.
+
+//this statement converts the json format into an javascript object .
 app.use(express.json());
 
 
@@ -32,8 +52,6 @@ app.use((err, req, res, next) => {
     next(err);
 });
 
-let bookings = [];
-
 // mailer setup using nodemailer (requires `npm install nodemailer`)
 // You'll need to configure these credentials with real SMTP settings.
 const nodemailer = require('nodemailer');
@@ -46,19 +64,40 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// POST route
+// POST route for booking (saves to database)
 app.post('/book', (req, res) => {
+    const { name, email, phone, event_type, event_date, event_time, message } = req.body;
 
-    bookings.push(req.body);
-    console.log("New Booking:", req.body);
-    res.json({ message: "Booking saved successfully" });
+    if (!name || !email || !phone || !event_type || !event_date) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const sql = "INSERT INTO bookings (name, email, phone, event_type, event_date, event_time, message) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+    db.query(sql, [name, email, phone, event_type, event_date, event_time, message], (err, result) => {
+        if (err) {
+            console.error('Booking error:', err);
+            res.status(500).json({ error: 'Failed to save booking' });
+        } else {
+            console.log("New Booking:", req.body);
+            res.json({ message: "Booking saved successfully", bookingId: result.insertId });
+        }
+    });
 });
 
-// GET route for admin
+// GET route for admin - fetch all bookings from database
 app.get('/bookings', (req, res) => {
-    res.json(bookings);
-});
+    const sql = "SELECT * FROM bookings ORDER BY event_date DESC";
 
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            res.status(500).json({ error: 'Failed to fetch bookings' });
+        } else {
+            res.json(results);
+        }
+    });
+});
 // POST /send-email -> send a message to a client using booking info
 app.post('/send-email', (req, res) => {
     console.log('POST /send-email body:', req.body);
@@ -83,6 +122,37 @@ app.post('/send-email', (req, res) => {
     });
 });
 
+// File Upload Setup
+const multer = require("multer");
+const fs = require("fs");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage });
+
+app.post("/upload", upload.single("image"), (req, res) => {
+  res.json({ message: "Image uploaded successfully" });
+});
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.get("/images", (req, res) => {
+  fs.readdir(path.join(__dirname, "uploads"), (err, files) => {
+    if (err) return res.status(500).json({ error: "Unable to read folder" });
+
+    const imageUrls = files.map(file => `/uploads/${file}`);
+    res.json(imageUrls);
+  });
+});
+
+// Start Server
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });

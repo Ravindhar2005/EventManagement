@@ -64,15 +64,13 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         e.preventDefault();
 
         const booking = {
-            id: Date.now(),
-            eventType: document.getElementById('event-type').value,
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
             phone: document.getElementById('phone').value,
-            date: document.getElementById('date').value,
-            time: document.getElementById('time').value,
-            message: document.getElementById('message').value,
-            submittedAt: new Date().toLocaleString()
+            event_type: document.getElementById('event-type').value,
+            event_date: document.getElementById('date').value,
+            event_time: document.getElementById('time').value,
+            message: document.getElementById('message').value
         };
 
         // if the page is served from the Live Server port 3000 we must
