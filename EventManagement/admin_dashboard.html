@@ -26,7 +26,9 @@
         <div class="dashboard-header">
             <h2>📋 Booking Management</h2>
             <div>
-                <span class="booking-count"><a href="admin_dashboard.html">Total Bookings: <span id="bookingCount">0</span></a></span>
+                <span class="booking-count" style="margin-right: 15px;">Total Bookings: <span id="bookingCount">0</span></span>
+                <button class="nav-btn active" onclick="switchToUpcoming()">📅 Upcoming Bookings</button>
+                <button class="nav-btn" onclick="switchToCompleted()">✅ Completed Events</button>
                 <button class="messages-btn" onclick="switchToMessages()" style="margin-right: 10px;">💬 Messages</button>
                 <button class="clear-btn" onclick="clearAllBookings()">Clear All Bookings</button>
             </div>

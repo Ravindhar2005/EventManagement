@@ -174,5 +174,47 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 renderGallery();
             });
         }
+
+        // Contact Form Handler
+        const contactForm = document.getElementById('contactFormElement');
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const contactData = {
+                    name: document.getElementById('contact-name').value,
+                    email: document.getElementById('contact-email').value,
+                    phone: document.getElementById('contact-phone').value,
+                    message: document.getElementById('contact-message').value
+                };
+
+                const baseUrl = window.location.port === '3000' ? 'http://localhost:5000' : '';
+                const url = baseUrl + '/contact';
+                console.log('sending contact message to', url, contactData);
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactData)
+                })
+                .then(async res => {
+                    if (!res.ok) {
+                        const text = await res.text();
+                        throw new Error(text);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    alert("Message sent successfully! We will contact you soon.");
+                    contactForm.reset();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Error sending message: " + error.message);
+                });
+            });
+        }
     }
 });

@@ -98,6 +98,41 @@ app.get('/bookings', (req, res) => {
         }
     });
 });
+
+// POST route for contact messages
+app.post('/contact', (req, res) => {
+    const { name, email, phone, message } = req.body;
+
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'Name, email, and message are required' });
+    }
+
+    const sql = "INSERT INTO contact_messages (name, email, phone, message) VALUES (?, ?, ?, ?)";
+
+    db.query(sql, [name, email, phone || null, message], (err, result) => {
+        if (err) {
+            console.error('Contact message error:', err);
+            res.status(500).json({ error: 'Failed to save contact message' });
+        } else {
+            console.log("New Contact Message:", req.body);
+            res.json({ message: "Contact message saved successfully", messageId: result.insertId });
+        }
+    });
+});
+
+// GET route for admin - fetch all contact messages
+app.get('/contact-messages', (req, res) => {
+    const sql = "SELECT * FROM contact_messages ORDER BY created_at DESC";
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            res.status(500).json({ error: 'Failed to fetch contact messages' });
+        } else {
+            res.json(results);
+        }
+    });
+});
 // POST /send-email -> send a message to a client using booking info
 app.post('/send-email', (req, res) => {
     console.log('POST /send-email body:', req.body);

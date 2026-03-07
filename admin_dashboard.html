@@ -26,48 +26,78 @@
         <div class="dashboard-header">
             <h2>📋 Booking Management</h2>
             <div>
-                <span class="booking-count"><a href="admin_dashboard.html">Total Bookings: <span id="bookingCount">0</span></a></span>
+                <span class="booking-count" style="margin-right: 15px;">Total Bookings: <span id="bookingCount">0</span></span>
+                <button class="nav-btn active" onclick="switchToUpcoming()">📅 Upcoming Bookings</button>
+                <button class="nav-btn" onclick="switchToCompleted()">✅ Completed Events</button>
                 <button class="messages-btn" onclick="switchToMessages()" style="margin-right: 10px;">💬 Messages</button>
                 <button class="clear-btn" onclick="clearAllBookings()">Clear All Bookings</button>
             </div>
         </div>
         
-        <table class="bookings-table" id="bookingsTable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Event Type</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Event Date</th>
-                    <th>Event Time</th>
-                    <th>Message</th>
-                    <th>Submitted At</th>
-                    <th>Action</th>
-                    <th>Email Client</th>
-                </tr>
-            </thead>
-            <tbody id="bookingsBody">
-            </tbody>
-        </table>
-        <div id="noBookings" class="no-bookings">No bookings yet. <a href="index.html">Go back and make a booking!</a></div>
+        <!-- Upcoming Bookings Section -->
+        <div id="upcomingSection" style="display: block;">
+            <table class="bookings-table" id="bookingsTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Event Type</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Event Date</th>
+                        <th>Event Time</th>
+                        <th>Message</th>
+                        <th>Submitted At</th>
+                        <th>Action</th>
+                        <th>Email Client</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingsBody">
+                </tbody>
+            </table>
+            <div id="noBookings" class="no-bookings">No upcoming bookings yet. <a href="index.html">Go back and make a booking!</a></div>
 
-        <!-- Calendar block (added below booking management) -->
-        <div id="calendar" class="calendar" aria-label="Booking calendar">
-            <div class="calendar-header">
-                <button id="prevMonthBtn" aria-label="Previous month">&lt;</button>
-                <h3 id="monthYear"></h3>
-                <button id="nextMonthBtn" aria-label="Next month">&gt;</button>
+            <!-- Calendar block (added below booking management) -->
+            <div id="calendar" class="calendar" aria-label="Booking calendar">
+                <div class="calendar-header">
+                    <button id="prevMonthBtn" aria-label="Previous month">&lt;</button>
+                    <h3 id="monthYear"></h3>
+                    <button id="nextMonthBtn" aria-label="Next month">&gt;</button>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid">
+                    <div class="day-name">Sun</div><div class="day-name">Mon</div><div class="day-name">Tue</div>
+                    <div class="day-name">Wed</div><div class="day-name">Thu</div><div class="day-name">Fri</div><div class="day-name">Sat</div>
+                    <!-- date cells injected here by JS -->
+                </div>
+
+                <div id="dateBookings" class="date-bookings" aria-live="polite"></div>
             </div>
+        </div>
 
-            <div class="calendar-grid" id="calendarGrid">
-                <div class="day-name">Sun</div><div class="day-name">Mon</div><div class="day-name">Tue</div>
-                <div class="day-name">Wed</div><div class="day-name">Thu</div><div class="day-name">Fri</div><div class="day-name">Sat</div>
-                <!-- date cells injected here by JS -->
-            </div>
-
-            <div id="dateBookings" class="date-bookings" aria-live="polite"></div>
+        <!-- Completed Events Section -->
+        <div id="completedSection" style="display: none;">
+            <h3 style="margin-top: 20px; margin-bottom: 15px;">✅ Completed Events</h3>
+            <span class="booking-count" style="margin-bottom: 15px;">Total Completed: <span id="completedCount">0</span></span>
+            <table class="bookings-table" id="completedTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Event Type</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Event Date</th>
+                        <th>Event Time</th>
+                        <th>Message</th>
+                        <th>Submitted At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="completedBody">
+                </tbody>
+            </table>
+            <div id="noCompleted" class="no-bookings">No completed events yet.</div>
         </div>
 
         <!-- Messages Section (below calendar) -->
@@ -92,31 +122,105 @@
             window.location.href = 'admin-login.html';
         }
 
+        // Switch to Upcoming Bookings view
+        function switchToUpcoming() {
+            document.getElementById('upcomingSection').style.display = 'block';
+            document.getElementById('completedSection').style.display = 'none';
+            document.getElementById('messagesSection').style.display = 'none';
+            
+            // Update button styling
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            loadBookings();
+        }
+
+        // Switch to Completed Events view
+        function switchToCompleted() {
+            document.getElementById('upcomingSection').style.display = 'none';
+            document.getElementById('completedSection').style.display = 'block';
+            document.getElementById('messagesSection').style.display = 'none';
+            
+            // Update button styling
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            loadCompletedEvents();
+        }
+
         // Switch to Messages view
         function switchToMessages() {
             const bookingsSection = document.querySelector('.admin-container').firstChild;
             const messagesSection = document.getElementById('messagesSection');
             
-            // Hide bookings table and calendar
-            document.getElementById('bookingsTable').style.display = 'none';
-            document.getElementById('noBookings').style.display = 'none';
-            document.getElementById('calendar').style.display = 'none';
+            // Hide bookings and completed sections
+            document.getElementById('upcomingSection').style.display = 'none';
+            document.getElementById('completedSection').style.display = 'none';
             
             // Show messages section
             messagesSection.style.display = 'block';
+            
+            // Update button styling
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
             
             // Load messages
             loadMessages();
         }
 
-        // Switch back to Bookings view
-        function switchToBookings() {
-            const messagesSection = document.getElementById('messagesSection');
-            
-            // Show bookings
-            messagesSection.style.display = 'none';
-            document.getElementById('calendar').style.display = 'block';
-            loadBookings();
+        // Load and display completed events (past events)
+        function loadCompletedEvents() {
+            fetch('http://localhost:5000/bookings')
+                .then(response => response.json())
+                .then(bookings => {
+                    const tbody = document.getElementById('completedBody');
+                    const noCompleted = document.getElementById('noCompleted');
+                    const completedCount = document.getElementById('completedCount');
+                    
+                    // Get today's date
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    // Filter completed events (past events)
+                    const completedEvents = bookings.filter(booking => {
+                        const eventDate = new Date(booking.event_date);
+                        return eventDate < today;
+                    });
+                    
+                    tbody.innerHTML = '';
+                    completedCount.textContent = completedEvents.length;
+                    
+                    if (completedEvents.length === 0) {
+                        noCompleted.style.display = 'block';
+                        document.getElementById('completedTable').style.display = 'none';
+                        return;
+                    }
+                    
+                    noCompleted.style.display = 'none';
+                    document.getElementById('completedTable').style.display = 'table';
+                    
+                    // Display each completed booking as a table row
+                    completedEvents.forEach((booking, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td><strong>${booking.event_type || booking['event-type'] || booking.eventType}</strong></td>
+                            <td>${booking.name}</td>
+                            <td>${booking.email}</td>
+                            <td>${booking.phone}</td>
+                            <td>${booking.event_date || booking.date}</td>
+                            <td>${booking.event_time || booking.time}</td>
+                            <td>${booking.message || '-'}</td>
+                            <td>${booking.created_at || booking.submittedAt || new Date().toLocaleString()}</td>
+                            <td><button class="delete-btn" onclick="deleteBooking(${booking.id})">Delete</button></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading completed events:', error);
+                    alert('Error loading completed events. Make sure the server is running.');
+                });
         }
 
         // Load and display all messages
@@ -178,10 +282,20 @@
                     const noBookings = document.getElementById('noBookings');
                     const bookingCount = document.getElementById('bookingCount');
                     
-                    tbody.innerHTML = '';
-                    bookingCount.textContent = bookings.length;
+                    // Get today's date
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
                     
-                    if (bookings.length === 0) {
+                    // Filter upcoming events (future dates)
+                    const upcomingEvents = bookings.filter(booking => {
+                        const eventDate = new Date(booking.event_date);
+                        return eventDate >= today;
+                    }).sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
+                    
+                    tbody.innerHTML = '';
+                    bookingCount.textContent = upcomingEvents.length;
+                    
+                    if (upcomingEvents.length === 0) {
                         noBookings.style.display = 'block';
                         document.getElementById('bookingsTable').style.display = 'none';
                         return;
@@ -190,8 +304,8 @@
                     noBookings.style.display = 'none';
                     document.getElementById('bookingsTable').style.display = 'table';
                     
-                    // Display each booking as a table row
-                    bookings.forEach((booking, index) => {
+                    // Display each upcoming booking as a table row
+                    upcomingEvents.forEach((booking, index) => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${index + 1}</td>
