@@ -176,9 +176,9 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         }
 
         // Contact Form Handler
-        const contactForm = document.getElementById('contactFormElement');
-        if (contactForm) {
-            contactForm.addEventListener('submit', function(e) {
+        const contactFormElement = document.getElementById('contactFormElement');
+        if (contactFormElement) {
+            contactFormElement.addEventListener('submit', function(e) {
                 e.preventDefault();
 
                 const contactData = {

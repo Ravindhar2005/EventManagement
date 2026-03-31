@@ -478,14 +478,15 @@
         document.addEventListener('DOMContentLoaded', loadBookings);
     </script>
 
-
-    <center>
-         <h2>Upload Image</h2>
-        <form id="uploadForm" enctype="multipart/form-data">
-        <input type="file" name="image" required />
-        <button type="submit">Upload</button>
-        </form>
-    </center>
+    <div class="uploading">
+        <center>
+            <h2>Upload Image</h2>
+            <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="image" required />
+            <button type="submit">Upload</button>
+            </form>
+        </center>
+    </div>
 <script>
 document.getElementById("uploadForm").addEventListener("submit", async function(e) {
   e.preventDefault();

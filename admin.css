@@ -336,3 +336,405 @@ a:hover {
     color: #999;
     font-size: 16px;
 }
+
+/* Responsive Design - Tablet (768px to 1024px) */
+@media (max-width: 1024px) {
+    .navbar {
+        gap: 40px;
+        padding: 60px;
+        font-size: 16px;
+    }
+
+    .admin-container {
+        max-width: 100%;
+        margin: 15px;
+        padding: 15px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .bookings-table {
+        font-size: 14px;
+    }
+
+    .bookings-table th,
+    .bookings-table td {
+        padding: 10px;
+    }
+
+    .calendar {
+        max-width: 100%;
+    }
+
+    .messages-container {
+        gap: 10px;
+    }
+
+    .nav-btn {
+        padding: 8px 15px;
+        font-size: 12px;
+        margin-right: 5px;
+    }
+}
+
+/* Responsive Design - Mobile (below 768px) */
+@media (max-width: 768px) {
+    /* Navigation */
+    .navbar {
+        gap: 20px;
+        padding: 40px 20px;
+        font-size: 14px;
+        flex-wrap: wrap;
+        border-radius: 5px;
+    }
+
+    /* Admin Container */
+    .admin-container {
+        max-width: 100%;
+        margin: 10px;
+        padding: 15px;
+        border-radius: 5px;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+        display: block;
+        margin-bottom: 20px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .dashboard-header h2 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
+
+    .dashboard-header > div {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Buttons */
+    .clear-btn,
+    .nav-btn,
+    .messages-btn {
+        width: 100%;
+        padding: 10px 15px;
+        font-size: 12px;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .booking-count,
+    .messages-count {
+        width: 100%;
+        padding: 10px;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    /* Bookings Table */
+    .bookings-table {
+        font-size: 12px;
+        display: block;
+        overflow-x: auto;
+    }
+
+    .bookings-table thead {
+        display: none;
+    }
+
+    .bookings-table tbody {
+        display: block;
+    }
+
+    .bookings-table tr {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+        background-color: white;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .bookings-table td {
+        flex: 1 1 48%;
+        padding: 10px;
+        border: none;
+        border-right: 1px solid #eee;
+        word-break: break-word;
+    }
+
+    .bookings-table td:nth-child(even) {
+        border-right: none;
+    }
+
+    .bookings-table td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        color: #333;
+        margin-bottom: 5px;
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+
+    /* Delete and Action Buttons */
+    .delete-btn {
+        width: 100%;
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    /* Calendar */
+    .calendar {
+        max-width: 100%;
+        margin: 20px 0;
+        padding: 12px;
+    }
+
+    .calendar-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .calendar-header h3 {
+        margin: 10px 0;
+        font-size: 14px;
+    }
+
+    .calendar-header button {
+        width: 100%;
+        padding: 8px;
+    }
+
+    .calendar-grid {
+        gap: 4px;
+    }
+
+    .day-name {
+        font-size: 11px;
+        padding: 4px 2px;
+    }
+
+    .date-cell {
+        min-height: 50px;
+        padding: 4px;
+    }
+
+    .date-cell .date-num {
+        font-size: 12px;
+    }
+
+    /* Messages Section */
+    .messages-section {
+        padding: 15px;
+        border-radius: 5px;
+    }
+
+    .messages-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+    }
+
+    .messages-header h2 {
+        font-size: 1.3rem;
+        margin: 0;
+    }
+
+    .messages-header > div {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .messages-count {
+        margin-bottom: 10px;
+    }
+
+    .messages-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .message-card {
+        padding: 12px;
+        border-left-width: 3px;
+    }
+
+    .message-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 8px;
+    }
+
+    .message-header strong {
+        font-size: 14px;
+    }
+
+    .delete-msg-btn {
+        width: 100%;
+        padding: 8px;
+    }
+
+    .message-details {
+        font-size: 12px;
+    }
+
+    .message-text {
+        padding: 8px;
+        margin-top: 8px !important;
+        font-size: 12px;
+    }
+
+    /* Table Headers - Add data labels for mobile */
+    @supports (-webkit-appearance: none) {
+        .bookings-table td:nth-child(1)::before { content: "#"; }
+        .bookings-table td:nth-child(2)::before { content: "Event Type"; }
+        .bookings-table td:nth-child(3)::before { content: "Name"; }
+        .bookings-table td:nth-child(4)::before { content: "Email"; }
+        .bookings-table td:nth-child(5)::before { content: "Phone"; }
+        .bookings-table td:nth-child(6)::before { content: "Event Date"; }
+        .bookings-table td:nth-child(7)::before { content: "Event Time"; }
+        .bookings-table td:nth-child(8)::before { content: "Message"; }
+        .bookings-table td:nth-child(9)::before { content: "Submitted At"; }
+        .bookings-table td:nth-child(10)::before { content: "Action"; }
+        .bookings-table td:nth-child(11)::before { content: "Email"; }
+    }
+}
+
+/* Responsive Design - Small Mobile (below 480px) */
+@media (max-width: 480px) {
+    /* Navigation */
+    .navbar {
+        gap: 10px;
+        padding: 25px 15px;
+        font-size: 12px;
+    }
+
+    /* Admin Container */
+    .admin-container {
+        margin: 5px;
+        padding: 10px;
+    }
+
+    /* Headers */
+    .dashboard-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .dashboard-header h2 {
+        font-size: 1.1rem;
+    }
+
+    /* Buttons Responsive */
+    .clear-btn,
+    .nav-btn,
+    .messages-btn {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+
+    /* Bookings Table */
+    .bookings-table {
+        font-size: 11px;
+    }
+
+    .bookings-table tr {
+        margin-bottom: 12px;
+    }
+
+    .bookings-table td {
+        flex: 1 1 100%;
+        padding: 8px;
+    }
+
+    .bookings-table td:nth-child(even) {
+        border-right: 1px solid #eee;
+    }
+
+    .delete-btn {
+        padding: 6px;
+        font-size: 10px;
+    }
+
+    /* Calendar */
+    .calendar {
+        padding: 10px;
+    }
+
+    .calendar-header h3 {
+        font-size: 12px;
+    }
+
+    .calendar-header button {
+        padding: 6px;
+        font-size: 11px;
+    }
+
+    .date-cell {
+        min-height: 45px;
+        padding: 3px;
+        border-radius: 4px;
+    }
+
+    .date-cell .date-num {
+        font-size: 10px;
+    }
+
+    .day-name {
+        font-size: 10px;
+        padding: 3px 2px;
+    }
+
+    /* Messages */
+    .delete-msg-btn {
+        padding: 6px;
+        font-size: 10px;
+    }
+
+    .message-details {
+        font-size: 11px;
+    }
+
+    .message-text {
+        padding: 6px;
+        font-size: 11px;
+    }
+
+    /* No Bookings / No Messages */
+    .no-bookings,
+    .no-messages {
+        padding: 30px 15px;
+        font-size: 14px;
+    }
+}
+
+.uploading {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 400px;
+    padding-bottom: 50px;
+}
