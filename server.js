@@ -4,9 +4,23 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
+
+// 🔥 Static files serve pannum (FIRST)
+app.use(express.static(path.join(__dirname, "public")));
+
+// 🔥 Default route (NEXT)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+
 // the backend listens on 5000 by default; the client will always call that port explicitly
 // you can override with PORT environment variable if needed
 const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 // MySQL Database Connection
 const mysql = require('mysql2');
