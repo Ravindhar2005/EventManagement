@@ -27,9 +27,9 @@
             <h2>📋 Booking Management</h2>
             <div>
                 <span class="booking-count" style="margin-right: 15px;">Total Bookings: <span id="bookingCount">0</span></span>
-                <button class="nav-btn active" onclick="switchToUpcoming()">📅 Upcoming Bookings</button>
-                <button class="nav-btn" onclick="switchToCompleted()">✅ Completed Events</button>
-                <button class="messages-btn" onclick="switchToMessages()" style="margin-right: 10px;">💬 Messages</button>
+                <button class="nav-btn active" onclick="switchToUpcoming(event)">📅 Upcoming Bookings</button>
+                <button class="nav-btn" onclick="switchToCompleted(event)">✅ Completed Events</button>
+                <button class="messages-btn" onclick="switchToMessages(event)" style="margin-right: 10px;">💬 Messages</button>
                 <button class="clear-btn" onclick="clearAllBookings()">Clear All Bookings</button>
             </div>
         </div>
@@ -123,34 +123,33 @@
         }
 
         // Switch to Upcoming Bookings view
-        function switchToUpcoming() {
+        function switchToUpcoming(event) {
             document.getElementById('upcomingSection').style.display = 'block';
             document.getElementById('completedSection').style.display = 'none';
             document.getElementById('messagesSection').style.display = 'none';
             
             // Update button styling
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) event.target.classList.add('active');
             
             loadBookings();
         }
 
         // Switch to Completed Events view
-        function switchToCompleted() {
+        function switchToCompleted(event) {
             document.getElementById('upcomingSection').style.display = 'none';
             document.getElementById('completedSection').style.display = 'block';
             document.getElementById('messagesSection').style.display = 'none';
             
             // Update button styling
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) event.target.classList.add('active');
             
             loadCompletedEvents();
         }
 
         // Switch to Messages view
-        function switchToMessages() {
-            const bookingsSection = document.querySelector('.admin-container').firstChild;
+        function switchToMessages(event) {
             const messagesSection = document.getElementById('messagesSection');
             
             // Hide bookings and completed sections
@@ -162,15 +161,17 @@
             
             // Update button styling
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) event.target.classList.add('active');
             
             // Load messages
             loadMessages();
         }
 
+        const API_BASE_URL = (window.location.protocol === 'file:' || window.location.port !== '5000') ? 'http://localhost:5000' : '';
+
         // Load and display completed events (past events)
         function loadCompletedEvents() {
-            fetch('http://localhost:5000/bookings')
+            fetch(API_BASE_URL + '/bookings')
                 .then(response => response.json())
                 .then(bookings => {
                     const tbody = document.getElementById('completedBody');
@@ -224,6 +225,66 @@
         }
 
         // Load and display all messages
+
+         
+        function loadMessages() {
+
+            fetch(API_BASE_URL + '/contact-messages')
+                .then(response => response.json())
+                .then(messages => {
+
+            const container = document.getElementById('messagesContainer');
+            const messagesCount = document.getElementById('messagesCount');
+
+            messagesCount.textContent = messages.length;
+
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="no-messages">No messages yet.</div>';
+                return;
+            }
+
+            container.innerHTML = messages.map((msg, index) => `
+
+                <div class="message-card">
+
+                    <div class="message-header">
+                        <strong>#${index + 1} - ${msg.name}</strong>
+
+                        <button class="delete-msg-btn">
+                            Delete
+                        </button>
+                    </div>
+
+                    <div class="message-details">
+                        <p><strong>Email:</strong> ${msg.email}</p>
+
+                        <p><strong>Phone:</strong> ${msg.phone || 'N/A'}</p>
+
+                        <p><strong>Message:</strong></p>
+
+                        <p class="message-text">
+                            ${msg.message}
+                        </p>
+
+                        <small>
+                            <strong>Submitted:</strong>
+                            ${msg.created_at}
+                        </small>
+                    </div>
+
+                </div>
+
+            `).join('');
+
+        })
+        .catch(error => {
+
+            console.error('Error loading messages:', error);
+
+            alert('Error loading messages.');
+        });
+}
+        /*
         function loadMessages() {
             const messages = JSON.parse(localStorage.getItem('messages')) || [];
             const container = document.getElementById('messagesContainer');
@@ -251,7 +312,7 @@
                     </div>
                 </div>
             `).join('');
-        }
+        }*/
 
         // Delete a specific message
         function deleteMessage(id) {
@@ -275,7 +336,7 @@
         function loadBookings() {
             // explicitly request from the API port so dashboard works even if the page is
         // opened outside of the Express server.
-        fetch('http://localhost:5000/bookings')
+        fetch(API_BASE_URL + '/bookings')
                 .then(response => response.json())
                 .then(bookings => {
                     const tbody = document.getElementById('bookingsBody');
@@ -341,7 +402,7 @@
             const text = prompt('Message body:', 'Thank you for your booking. We will contact you soon.');
             if (text === null) return;
 
-            fetch('/send-email', {
+            fetch(API_BASE_URL + '/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ to: email, subject, text })

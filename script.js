@@ -59,84 +59,97 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     const bookingForm = document.getElementById('bookingFormElement');
     const successMessage = document.getElementById('success-message');
 
-    if (bookingForm) {
-    bookingForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const booking = {
-            name: document.getElementById('name').value,
-            email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value,
-            event_type: document.getElementById('event-type').value,
-            event_date: document.getElementById('date').value,
-            event_time: document.getElementById('time').value,
-            message: document.getElementById('message').value
-        };
-
-        // if the page is served from the Live Server port 3000 we must
-        // target the backend explicitly; otherwise a relative URL works.
-        // logging helps debug network errors.
-        const baseUrl = window.location.port === '3000' ? 'http://localhost:5000' : '';
-        const url = baseUrl + '/book';
-        console.log('sending booking to', url, booking);
-
-        fetch(url, {
-    method: "POST",          
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify(booking)
-})
-.then(async res => {
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+    function getApiBaseUrl() {
+        if (window.location.protocol === 'file:') {
+            return 'http://localhost:5000';
+        }
+        if (window.location.hostname === 'localhost' && (window.location.port === '' || window.location.port === '5000')) {
+            return '';
+        }
+        return 'http://localhost:5000';
     }
-    return res.json();
-})
-.then(data => {
-    alert("Booking saved successfully!");
-    bookingForm.reset();
-})
-.catch(err => {
-    console.error(err);
-    alert("Error saving booking: " + err.message);
-});
-    });
-}
-    // Handle "Send us a Message" contact form
-    const contactForm = document.querySelector('.contact-form form'); /* here first contact-form represents the class name of the div tag  
-    and the second form represents the form tag inside that div tag*/
-    if (contactForm) {
-        contactForm.addEventListener('submit', function (e) {
+
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            // Collect form data 
-            const message = {
-              //key : value
-                id: Date.now(),
-                name: contactForm.querySelector('input[placeholder="Your Name"]').value,
-                email: contactForm.querySelector('input[placeholder="Your Email"]').value,
-                //If user doesnot provide phone number means automatically set it to N/A:
-                phone: contactForm.querySelector('input[placeholder="Your Phone"]').value || 'N/A',
-                messageText: contactForm.querySelector('textarea[placeholder="Your Message"]').value,
-                submittedAt: new Date().toLocaleString()
+            const booking = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                event_type: document.getElementById('event-type').value,
+                event_date: document.getElementById('date').value,
+                event_time: document.getElementById('time').value,
+                message: document.getElementById('message').value
             };
 
-            // Get existing messages from localStorage
-            let messages = JSON.parse(localStorage.getItem('messages')) || [];
+            const baseUrl = getApiBaseUrl();
+            const url = baseUrl + '/book';
+            console.log('sending booking to', url, booking);
 
-            // Add new message
-            messages.push(message);
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(booking)
+            })
+            .then(async res => {
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(text);
+                }
+                return res.json();
+            })
+            .then(data => {
+                alert('Booking saved successfully!');
+                bookingForm.reset();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error saving booking: ' + err.message);
+            });
+        });
+    }
 
-            // Save back to localStorage
-            localStorage.setItem('messages', JSON.stringify(messages));
+    const contactFormElement = document.getElementById('contactFormElement');
+    if (contactFormElement) {
+        contactFormElement.addEventListener('submit', function (e) {
+            e.preventDefault();
 
-            // Show success message
-            alert('✓ Message submitted successfully!');
+            const contactData = {
+                name: document.getElementById('contact-name').value,
+                email: document.getElementById('contact-email').value,
+                phone: document.getElementById('contact-phone').value,
+                message: document.getElementById('contact-message').value
+            };
 
-            // Reset form
-            contactForm.reset();
+            const baseUrl = getApiBaseUrl();
+            const url = baseUrl + '/contact';
+            console.log('sending contact message to', url, contactData);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(contactData)
+            })
+            .then(async res => {
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(text);
+                }
+                return res.json();
+            })
+            .then(data => {
+                alert('Message sent successfully! We will contact you soon.');
+                contactFormElement.reset();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error sending message: ' + error.message);
+            });
         });
     }
 
@@ -208,7 +221,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 })
                 .then(data => {
                     alert("Message sent successfully! We will contact you soon.");
-                    contactForm.reset();
+                    contactFormElement.reset();
                 })
                 .catch(error => {
                     console.error('Error:', error);
