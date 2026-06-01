@@ -18,63 +18,240 @@
             </div>
         </ul>
     </nav>
-    <section>  
-        <center>
-            <h1>EVENT GALLERY</h1>
-        </center>
+    <br><br>
+
+    <!-- Hero Carousel -->
+    <section class="hero-carousel" aria-label="Featured gallery carousel">
+      <div class="carousel-container">
+        <button class="carousel-btn prev" aria-label="Previous slide">‹</button>
+        <div class="carousel-track">
+          <div class="carousel-slide">
+            <img src="gallerywallpaper.jpg" alt="Featured image 1">
+          </div>
+          <div class="carousel-slide">
+            <img src="gallerywallpaper.jpg" alt="Featured image 2">
+          </div>
+          <div class="carousel-slide">
+            <img src="gallerywallpaper.jpg" alt="Featured image 3">
+          </div>
+        </div>
+        <button class="carousel-btn next" aria-label="Next slide">›</button>
+      </div>
+      <div class="carousel-dots" aria-hidden="false"></div>
     </section>
 
-    
+    <!-- Gallery Header + Categories -->
+    <div class="container">
+      <header class="page-header">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="index.html">Home</a>
+          <span aria-hidden="true">/</span>
+          <span>Gallery</span>
+        </nav>
+        <h1 class="page-title">Event Gallery</h1>
+        <p class="lead">A curated collection of highlights from recent events. Click any image to view it full-size.</p>
+      </header>
 
-    <h2>Gallery</h2>
-<div id="gallery"></div>
+      <div class="category-bar" role="tablist" aria-label="Gallery categories">
+        <button class="category-block active" aria-pressed="true" data-cat="Wedding">Wedding</button>
+        <button class="category-block" aria-pressed="false" data-cat="Baby Shower">Baby Shower</button>
+        <button class="category-block" aria-pressed="false" data-cat="Birthday Party">Birthday Party</button>
+        <button class="category-block" aria-pressed="false" data-cat="Corporate Event">Corporate</button>
+        <button class="category-block" aria-pressed="false" data-cat="Anniversary Celebration">Anniversary</button>
+        <button class="category-block" aria-pressed="false" data-cat="Engagement Party">Engagement</button>
+        <button class="category-block" aria-pressed="false" data-cat="All">All</button>
+      </div>
+
+      <div class="current-category-title">Wedding Photos</div>
+      <div id="gallery"></div>
+    </div>
 
 <script>
-fetch("/images")
-  .then(res => res.json())
+// Hero carousel behavior (isolated, won't affect gallery uploads)
+(function() {
+  const track = document.querySelector('.carousel-track');
+  if (!track) return;
+  const slides = Array.from(track.children);
+  const prevBtn = document.querySelector('.carousel-btn.prev');
+  const nextBtn = document.querySelector('.carousel-btn.next');
+  const dotsContainer = document.querySelector('.carousel-dots');
+
+  let index = 0;
+  let timeoutId;
+
+  function goTo(i) {
+    index = (i + slides.length) % slides.length;
+    track.style.transform = `translateX(-${index * 100}%)`;
+    updateDots();
+    resetAutoplay();
+  }
+
+  function prev() { goTo(index - 1); }
+  function next() { goTo(index + 1); }
+
+  function createDots() {
+    slides.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.addEventListener('click', () => goTo(i));
+      dotsContainer.appendChild(btn);
+    });
+    updateDots();
+  }
+
+  function updateDots() {
+    Array.from(dotsContainer.children).forEach((b, i) => b.classList.toggle('active', i === index));
+  }
+
+
+  function resetAutoplay() {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => next(), 4500);
+  }
+
+  prevBtn.addEventListener('click', prev);
+  nextBtn.addEventListener('click', next);
+  createDots();
+  goTo(0);
+})();
+</script>
+
+<script>
+// Fetch images and filter by selected category
+fetch('/images/details')
+  .then(r => r.json())
   .then(images => {
-    const gallery = document.getElementById("gallery");
+    const gallery = document.getElementById('gallery');
+    const categoryButtons = Array.from(document.querySelectorAll('.category-block'));
+    const titleEl = document.querySelector('.current-category-title');
     gallery.innerHTML = '';
 
-    if (!images.length) {
+    if (!images || !images.length) {
       gallery.innerHTML = '<p class="empty-message">No gallery images have been uploaded yet.</p>';
       return;
     }
 
+    const categories = ['Wedding','Baby Shower','Birthday Party','Corporate Event','Anniversary Celebration','Engagement Party','Others'];
+    const map = { All: [] };
+    categories.forEach(c => map[c] = []);
+
+    function detectCategory(item) {
+      const t = (item.event_name || '').toLowerCase();
+      if (t.includes('wedding') || t.includes('bride') || t.includes('groom')) return 'Wedding';
+      if (t.includes('baby') || t.includes('shower')) return 'Baby Shower';
+      if (t.includes('birthday')) return 'Birthday Party';
+      if (t.includes('corporate') || t.includes('conference') || t.includes('office')) return 'Corporate Event';
+      if (t.includes('anniversary')) return 'Anniversary Celebration';
+      if (t.includes('engagement') || t.includes('proposal')) return 'Engagement Party';
+      return 'Others';
+    }
+
     images.forEach(img => {
-      const card = document.createElement('div');
-      card.className = 'gallery-card';
-
-      const imageElement = document.createElement('img');
-      imageElement.src = img;
-      imageElement.alt = 'Event photo';
-
-      const content = document.createElement('div');
-      content.className = 'gallery-card-content';
-
-      const title = document.createElement('h3');
-      title.className = 'gallery-card-title';
-      title.textContent = 'Event Photo';
-
-      const tag = document.createElement('span');
-      tag.className = 'gallery-card-type';
-      tag.textContent = 'Gallery';
-
-      const desc = document.createElement('p');
-      desc.className = 'gallery-card-desc';
-      desc.textContent = 'Uploaded event photo from admin dashboard.';
-
-      content.appendChild(title);
-      content.appendChild(tag);
-      content.appendChild(desc);
-      card.appendChild(imageElement);
-      card.appendChild(content);
-      gallery.appendChild(card);
+      const cat = detectCategory(img);
+      map[cat].push(img);
+      map.All.push(img);
     });
+
+    function renderCategory(catName) {
+      const items = catName === 'All' ? map.All : map[catName] || [];
+      const categoryLabel = catName === 'All' ? 'All Photos' : `${catName} Photos`;
+      titleEl.textContent = categoryLabel;
+      gallery.innerHTML = '';
+
+      if (!items.length) {
+        gallery.innerHTML = '<p class="empty-message">No photos available for this category yet.</p>';
+        return;
+      }
+
+      const grid = document.createElement('div');
+      grid.className = 'section-grid';
+
+      items.forEach(image => {
+        const card = document.createElement('div');
+        card.className = 'gallery-card';
+
+        const imgEl = document.createElement('img');
+        imgEl.src = image.url || image;
+        imgEl.alt = image.event_name || 'Event photo';
+        imgEl.setAttribute('loading', 'lazy');
+
+        const content = document.createElement('div');
+        content.className = 'gallery-card-content';
+        const title = document.createElement('h3');
+        title.className = 'gallery-card-title';
+        title.textContent = image.event_name || '';
+        const location = document.createElement('p');
+        location.className = 'gallery-card-location';
+        location.textContent = image.event_location || 'Location not set';
+        content.appendChild(title);
+        content.appendChild(location);
+
+        card.appendChild(imgEl);
+        card.appendChild(content);
+        grid.appendChild(card);
+      });
+
+      gallery.appendChild(grid);
+    }
+
+    categoryButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        categoryButtons.forEach(other => {
+          other.classList.toggle('active', other === btn);
+          other.setAttribute('aria-pressed', other === btn);
+        });
+        renderCategory(btn.dataset.cat);
+      });
+    });
+
+    // Initial wedding view
+    renderCategory('Wedding');
   })
   .catch(() => {
     document.getElementById('gallery').innerHTML = '<p class="empty-message">Unable to load gallery images.</p>';
   });
+</script>
+<!-- Lightbox Modal -->
+<div id="lightbox" class="lightbox" aria-hidden="true">
+  <button class="lightbox-close" aria-label="Close">✕</button>
+  <div class="lightbox-content" role="dialog" aria-modal="true">
+    <img src="" alt="" />
+    <p class="lightbox-caption"></p>
+  </div>
+</div>
+
+<script>
+// Lightbox event delegation (non-invasive)
+(function(){
+  const gallery = document.getElementById('gallery');
+  const lightbox = document.getElementById('lightbox');
+  if (!gallery || !lightbox) return;
+  const lbImg = lightbox.querySelector('img');
+  const lbCaption = lightbox.querySelector('.lightbox-caption');
+  const closeBtn = lightbox.querySelector('.lightbox-close');
+
+  function open(src, alt){
+    lbImg.src = src;
+    lbImg.alt = alt || '';
+    lbCaption.textContent = alt || '';
+    lightbox.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+  }
+  function close(){
+    lightbox.setAttribute('aria-hidden','true');
+    lbImg.src = '';
+    document.body.style.overflow = '';
+  }
+
+  gallery.addEventListener('click', (e) => {
+    const img = e.target.closest && e.target.closest('img');
+    if (!img || !gallery.contains(img)) return;
+    open(img.src, img.alt || img.dataset.caption || 'Event photo');
+  });
+
+  closeBtn.addEventListener('click', close);
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && lightbox.getAttribute('aria-hidden') === 'false') close(); });
+})();
 </script>
 </body>
 </html>

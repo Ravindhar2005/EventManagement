@@ -75,65 +75,7 @@
 
     <section class="testimonials">
         <h2>What Our Clients Say</h2>
-        <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <div class="testimonial-rating" aria-label="5 out of 5 stars">
-                    <div class="stars">
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                    </div>
-                    <span class="rating-value">5.0</span>
-                </div>
-                <div class="testimonial-content">
-                    <p>"Nigazhi made our wedding day absolutely perfect. Every detail was taken care of, and our guests are still talking about how amazing everything was!"</p>
-                </div>
-                <div class="testimonial-author">
-                    <strong>Sarah & John</strong><br>
-                    <span>Wedding Couple</span>
-                </div>
-            </div>
-            <div class="testimonial-card">
-                <div class="testimonial-rating" aria-label="4 out of 5 stars">
-                    <div class="stars">
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                        <span class="star">☆</span>
-                    </div>
-                    <span class="rating-value">4.0</span>
-                </div>
-                <div class="testimonial-content">
-                    <p>"The baby shower they organized for us was beyond our expectations. The decorations, food, and games were all perfectly coordinated."</p>
-                </div>
-                <div class="testimonial-author">
-                    <strong>Maria Rodriguez</strong><br>
-                    <span>Happy Mother</span>
-                </div>
-            </div>
-            <div class="testimonial-card">
-                <div class="testimonial-rating" aria-label="5 out of 5 stars">
-                    <div class="stars">
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                        <span class="star filled">★</span>
-                    </div>
-                    <span class="rating-value">5.0</span>
-                </div>
-                <div class="testimonial-content">
-                    <p>"Our corporate conference was a huge success thanks to Nigazhi's professional team. Everything ran smoothly from start to finish."</p>
-                </div>
-                <div class="testimonial-author">
-                    <strong>David Chen</strong><br>
-                    <span>CEO, TechCorp</span>
-                </div>
-            </div>
-        </div>
+        <div class="testimonials-grid" id="testimonialsGrid"></div>
     </section>
 
     <section class="contact" id="contact">
@@ -201,6 +143,64 @@
             
         </form>
     </section>
+
+    <script>
+        const testimonialStorageKey = 'adminTestimonials';
+
+        const defaultTestimonials = [
+            {
+                id: 'default-1',
+                name: 'Sarah & John',
+                message: '"Nigazhi made our wedding day absolutely perfect. Every detail was taken care of, and our guests are still talking about how amazing everything was!"',
+                rating: 5,
+                role: 'Wedding Couple'
+            },
+            {
+                id: 'default-2',
+                name: 'Maria Rodriguez',
+                message: '"The baby shower they organized for us was beyond our expectations. The decorations, food, and games were all perfectly coordinated."',
+                rating: 4,
+                role: 'Happy Mother'
+            },
+            {
+                id: 'default-3',
+                name: 'David Chen',
+                message: '"Our corporate conference was a huge success thanks to Nigazhi\'s professional team. Everything ran smoothly from start to finish."',
+                rating: 5,
+                role: 'CEO, TechCorp'
+            }
+        ];
+
+        function renderTestimonials() {
+            const grid = document.getElementById('testimonialsGrid');
+            if (!grid) return;
+
+            const savedTestimonials = JSON.parse(localStorage.getItem(testimonialStorageKey)) || [];
+            const combinedTestimonials = [...defaultTestimonials, ...savedTestimonials];
+
+            grid.innerHTML = combinedTestimonials.map((item) => {
+                const stars = '★'.repeat(Number(item.rating || 5)) + '☆'.repeat(Math.max(0, 5 - Number(item.rating || 5)));
+                return `
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating" aria-label="${item.rating || 5} out of 5 stars">
+                            <div class="stars">${stars.split('').map((star, index) => `<span class="star ${star === '★' ? 'filled' : ''}">${star}</span>`).join('')}</div>
+                            <span class="rating-value">${(Number(item.rating || 5)).toFixed(1)}</span>
+                        </div>
+                        <div class="testimonial-content">
+                            <p>${item.message}</p>
+                        </div>
+                        <div class="testimonial-author">
+                            <strong>${item.name}</strong><br>
+                            <span>${item.role || 'Client'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', renderTestimonials);
+    </script>
+
     <footer class="futer">
         <div class="footer-content">
             <div class="footer-section">

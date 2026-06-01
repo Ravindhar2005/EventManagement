@@ -22,18 +22,22 @@
         <h1>Admin Dashboard</h1>
         </center>
     </div>
+
     <div class="admin-container">
         <div class="dashboard-header">
-            <h2>📋 Booking Management</h2>
+            <h2> Booking Management</h2>
             <div>
                 <span class="booking-count" style="margin-right: 15px;">Total Bookings: <span id="bookingCount">0</span></span>
-                <button class="nav-btn active" onclick="switchToUpcoming(event)">📅 Upcoming Bookings</button>
-                <button class="nav-btn" onclick="switchToCompleted(event)">✅ Completed Events</button>
-                <button class="messages-btn" onclick="switchToMessages(event)" style="margin-right: 10px;">💬 Messages</button>
-                <button class="clear-btn" onclick="clearAllBookings()">Clear All Bookings</button>
+                <button class="nav-btn active" onclick="switchToUpcoming(event)"> Upcoming Bookings</button>
+                <button class="nav-btn" onclick="switchToCompleted(event)"> Completed Events</button>
+                <button class="messages-btn" onclick="switchToMessages(event)" style="margin-right: 10px;"> Messages</button>
+                <button class="nav-btn" onclick="switchToTestimonials(event)" style="margin-right: 10px;"> Testimonials</button>
+                <button class="nav-btn" onclick="switchToUploads(event)"> Upload Images</button>
             </div>
+
         </div>
-        
+
+
         <!-- Upcoming Bookings Section -->
         <div id="upcomingSection" style="display: block;">
             <table class="bookings-table" id="bookingsTable">
@@ -49,6 +53,7 @@
                         <th>Message</th>
                         <th>Submitted At</th>
                         <th>Action</th>
+                        <th>WhatsApp</th>
                         <th>Email Client</th>
                     </tr>
                 </thead>
@@ -56,23 +61,6 @@
                 </tbody>
             </table>
             <div id="noBookings" class="no-bookings">No upcoming bookings yet. <a href="index.html">Go back and make a booking!</a></div>
-
-            <!-- Calendar block (added below booking management) -->
-            <div id="calendar" class="calendar" aria-label="Booking calendar">
-                <div class="calendar-header">
-                    <button id="prevMonthBtn" aria-label="Previous month">&lt;</button>
-                    <h3 id="monthYear"></h3>
-                    <button id="nextMonthBtn" aria-label="Next month">&gt;</button>
-                </div>
-
-                <div class="calendar-grid" id="calendarGrid">
-                    <div class="day-name">Sun</div><div class="day-name">Mon</div><div class="day-name">Tue</div>
-                    <div class="day-name">Wed</div><div class="day-name">Thu</div><div class="day-name">Fri</div><div class="day-name">Sat</div>
-                    <!-- date cells injected here by JS -->
-                </div>
-
-                <div id="dateBookings" class="date-bookings" aria-live="polite"></div>
-            </div>
         </div>
 
         <!-- Completed Events Section -->
@@ -97,13 +85,35 @@
                 <tbody id="completedBody">
                 </tbody>
             </table>
-            <div id="noCompleted" class="no-bookings">No completed events yet.</div>
+            <div id="noCompleted" class="no-bookings">No completed events yet.</div>   
+        </div>
+
+        <!-- Shared Calendar block visible across views -->
+        <div id="calendar" class="calendar" aria-label="Booking calendar">
+            <div class="calendar-header">
+                <button id="prevMonthBtn" aria-label="Previous month">&lt;</button>
+                <h3 id="monthYear"></h3>
+                <button id="nextMonthBtn" aria-label="Next month">&gt;</button>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <div class="day-name">Sun</div><div class="day-name">Mon</div><div class="day-name">Tue</div>
+                <div class="day-name">Wed</div><div class="day-name">Thu</div><div class="day-name">Fri</div><div class="day-name">Sat</div>
+                <!-- date cells injected here by JS -->
+            </div>
+
+            <div class="calendar-legend" id="calendarLegend" aria-label="Calendar legend">
+                <span class="legend-item"><span class="legend-dot upcoming"></span>Upcoming</span>
+                <span class="legend-item"><span class="legend-dot completed"></span>Completed</span>
+            </div>
+
+            <div id="dateBookings" class="date-bookings" aria-live="polite"></div>
         </div>
 
         <!-- Messages Section (below calendar) -->
         <div id="messagesSection" class="messages-section" style="display: none;">
             <div class="messages-header">
-                <h2>💬 Messages</h2>
+                <h2> Messages</h2>
                 <div>
                     <span class="messages-count">Total Messages: <span id="messagesCount">0</span></span>
                     <button class="clear-btn" onclick="clearAllMessages()" style="margin-left: 10px;">Clear All Messages</button>
@@ -113,6 +123,75 @@
             <div class="messages-container" id="messagesContainer">
                 <div class="no-messages">No messages yet.</div>
             </div>
+        </div>
+
+        <!-- Testimonials Section -->
+        <div id="testimonialsSection" class="messages-section" style="display: none;">
+            <div class="messages-header">
+                <h2> Testimonials</h2>
+                <div>
+                    <span class="messages-count">Saved Testimonials: <span id="testimonialCount">0</span></span>
+                </div>
+            </div>
+
+            <div class="message-card" style="max-width: 780px; margin: 0 auto 20px;">
+                <div class="message-header">
+                    <strong>Add a client testimonial</strong>
+                </div>
+                <div class="message-details" style="padding: 16px;">
+                    <p>Add a new review to show in the homepage “What Our Clients Say” section.</p>
+                    <form id="testimonialForm" style="display:flex; flex-direction:column; gap:12px;">
+                        <input type="text" id="testimonialName" placeholder="Client name" required style="padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1;" />
+                        <textarea id="testimonialMessage" placeholder="Testimonial message" required rows="4" style="padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; resize: vertical;"></textarea>
+                        <label for="testimonialRating" style="font-weight:700; color:#2c3e50;">Rating</label>
+                        <select id="testimonialRating" style="padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1;">
+                            <option value="5">5 stars</option>
+                            <option value="4">4 stars</option>
+                            <option value="3">3 stars</option>
+                            <option value="2">2 stars</option>
+                            <option value="1">1 star</option>
+                        </select>
+                        <button type="submit" class="messages-btn" style="align-self:flex-start;">Save Testimonial</button>
+                    </form>
+                    <p id="testimonialStatus" class="no-messages" style="display:none; margin-top:12px;"></p>
+                </div>
+            </div>
+
+            <div class="messages-container" id="testimonialsContainer">
+                <div class="no-messages">No testimonials added yet.</div>
+            </div>
+        </div>
+
+        <!-- Upload Images Section -->
+        <div id="uploadSection" class="messages-section" style="display: none;">
+            <div class="messages-header">
+                <h2> Upload Images</h2>
+                <div>
+                    <span class="messages-count">Gallery Upload</span>
+                </div>
+            </div>
+
+            <div class="message-card" style="max-width: 780px; margin: 0 auto;">
+                <div class="message-header">
+                    <strong>Upload image to gallery</strong>
+                </div>
+                <div class="message-details" style="padding: 16px;">
+                    <p>Select an image file to upload. Add event details so the gallery entry stays organized.</p>
+                    <form id="uploadForm" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:12px;">
+                        <input type="text" name="event_name" placeholder="Event name" required style="padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1;" />
+                        <input type="text" name="event_location" placeholder="Event location" required style="padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1;" />
+                        <input type="file" name="image" accept="image/*" required />
+                        <button type="submit" class="messages-btn" style="align-self:flex-start;">Upload Image</button>
+                    </form>
+                    <p id="uploadStatus" class="no-messages" style="display:none; margin-top:12px;"></p>
+                </div>
+            </div>
+
+            <div class="gallery-upload-header" style="display:flex; justify-content:space-between; align-items:center; margin: 24px 0 12px;">
+                <h3 style="margin:0;">Uploaded Gallery Images</h3>
+                <span id="galleryUploadCount" class="messages-count">0 uploaded</span>
+            </div>
+            <div id="galleryUploadList" class="gallery-upload-grid"></div>
         </div>
     </div>
 
@@ -127,6 +206,9 @@
             document.getElementById('upcomingSection').style.display = 'block';
             document.getElementById('completedSection').style.display = 'none';
             document.getElementById('messagesSection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('testimonialsSection').style.display = 'none';
+            document.getElementById('calendar').style.display = 'block';
             
             // Update button styling
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -140,6 +222,9 @@
             document.getElementById('upcomingSection').style.display = 'none';
             document.getElementById('completedSection').style.display = 'block';
             document.getElementById('messagesSection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('testimonialsSection').style.display = 'none';
+            document.getElementById('calendar').style.display = 'block';
             
             // Update button styling
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -155,6 +240,9 @@
             // Hide bookings and completed sections
             document.getElementById('upcomingSection').style.display = 'none';
             document.getElementById('completedSection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('testimonialsSection').style.display = 'none';
+            document.getElementById('calendar').style.display = 'none';
             
             // Show messages section
             messagesSection.style.display = 'block';
@@ -167,26 +255,95 @@
             loadMessages();
         }
 
+        function switchToTestimonials(event) {
+            document.getElementById('upcomingSection').style.display = 'none';
+            document.getElementById('completedSection').style.display = 'none';
+            document.getElementById('messagesSection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('testimonialsSection').style.display = 'block';
+            document.getElementById('calendar').style.display = 'none';
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
+
+            loadTestimonials();
+        }
+
+        function switchToUploads(event) {
+            document.getElementById('upcomingSection').style.display = 'none';
+            document.getElementById('completedSection').style.display = 'none';
+            document.getElementById('messagesSection').style.display = 'none';
+            document.getElementById('testimonialsSection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'block';
+            document.getElementById('calendar').style.display = 'none';
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
+
+            const uploadForm = document.getElementById('uploadForm');
+            const uploadStatus = document.getElementById('uploadStatus');
+            if (uploadForm) {
+                uploadForm.reset();
+            }
+            if (uploadStatus) {
+                uploadStatus.style.display = 'none';
+                uploadStatus.textContent = '';
+            }
+
+            loadUploadedImages();
+        }
+
         const API_BASE_URL = (window.location.protocol === 'file:' || window.location.port !== '5000') ? 'http://localhost:5000' : '';
+        const uploadEndpoint = API_BASE_URL ? API_BASE_URL + '/upload' : '/upload';
+        const galleryImagesEndpoint = API_BASE_URL ? API_BASE_URL + '/images/details' : '/images/details';
+
+        let cachedBookings = [];
+
+        function parseBookingDate(booking) {
+            const dateValue = booking.event_date || booking.date;
+            if (!dateValue) return new Date(NaN);
+            return new Date(dateValue);
+        }
+
+        function getBookingStatus(booking) {
+            const eventDate = parseBookingDate(booking);
+            if (Number.isNaN(eventDate.getTime())) return 'unknown';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const bookingDay = new Date(eventDate);
+            bookingDay.setHours(0, 0, 0, 0);
+
+            return bookingDay < today ? 'completed' : 'upcoming';
+        }
+
+        function refreshBookingData() {
+            return fetch(API_BASE_URL + '/bookings')
+                .then(response => response.json())
+                .then(bookings => {
+                    cachedBookings = Array.isArray(bookings) ? bookings : [];
+                    window.calendarBookings = cachedBookings;
+                    if (typeof window.renderDashboardCalendar === 'function') {
+                        window.renderDashboardCalendar();
+                    }
+                    return cachedBookings;
+                })
+                .catch(error => {
+                    console.error('Error loading bookings:', error);
+                    throw error;
+                });
+        }
 
         // Load and display completed events (past events)
         function loadCompletedEvents() {
-            fetch(API_BASE_URL + '/bookings')
-                .then(response => response.json())
+            refreshBookingData()
                 .then(bookings => {
                     const tbody = document.getElementById('completedBody');
                     const noCompleted = document.getElementById('noCompleted');
                     const completedCount = document.getElementById('completedCount');
                     
-                    // Get today's date
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    // Filter completed events (past events)
-                    const completedEvents = bookings.filter(booking => {
-                        const eventDate = new Date(booking.event_date);
-                        return eventDate < today;
-                    });
+                    const completedEvents = bookings.filter(booking => getBookingStatus(booking) === 'completed');
                     
                     tbody.innerHTML = '';
                     completedCount.textContent = completedEvents.length;
@@ -200,7 +357,6 @@
                     noCompleted.style.display = 'none';
                     document.getElementById('completedTable').style.display = 'table';
                     
-                    // Display each completed booking as a table row
                     completedEvents.forEach((booking, index) => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -250,7 +406,7 @@
                     <div class="message-header">
                         <strong>#${index + 1} - ${msg.name}</strong>
 
-                        <button class="delete-msg-btn">
+                        <button class="delete-msg-btn" onclick="deleteMessage(${msg.id})">
                             Delete
                         </button>
                     </div>
@@ -316,12 +472,40 @@
 
         // Delete a specific message
         function deleteMessage(id) {
-            if (confirm('Are you sure you want to delete this message?')) {
-                let messages = JSON.parse(localStorage.getItem('messages')) || [];
-                messages = messages.filter(msg => msg.id !== id);
-                localStorage.setItem('messages', JSON.stringify(messages));
+            if (!confirm('Are you sure you want to delete this message?')) return;
+
+            fetch(API_BASE_URL + '/contact-messages/' + encodeURIComponent(id), {
+                method: 'DELETE'
+            })
+            .then(async response => {
+                const text = await response.text();
+                if (!response.ok) {
+                    let payload;
+                    try {
+                        payload = text ? JSON.parse(text) : null;
+                    } catch (parseError) {
+                        payload = null;
+                    }
+                    throw new Error((payload && payload.error) || text || 'Failed to delete message');
+                }
+
+                if (text) {
+                    try {
+                        return JSON.parse(text);
+                    } catch (parseError) {
+                        return {};
+                    }
+                }
+
+                return {};
+            })
+            .then(() => {
                 loadMessages();
-            }
+            })
+            .catch(error => {
+                console.error('Error deleting message:', error);
+                alert('Error deleting message: ' + error.message);
+            });
         }
 
         // Clear all messages
@@ -334,65 +518,113 @@
         
         // Load and display all bookings when page opens
         function loadBookings() {
-            // explicitly request from the API port so dashboard works even if the page is
-        // opened outside of the Express server.
-        fetch(API_BASE_URL + '/bookings')
-                .then(response => response.json())
-                .then(bookings => {
-                    const tbody = document.getElementById('bookingsBody');
-                    const noBookings = document.getElementById('noBookings');
-                    const bookingCount = document.getElementById('bookingCount');
-                    
-                    // Get today's date
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    // Filter upcoming events (future dates)
-                    const upcomingEvents = bookings.filter(booking => {
-                        const eventDate = new Date(booking.event_date);
-                        return eventDate >= today;
-                    }).sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
-                    
-                    tbody.innerHTML = '';
-                    bookingCount.textContent = upcomingEvents.length;
-                    
-                    if (upcomingEvents.length === 0) {
-                        noBookings.style.display = 'block';
-                        document.getElementById('bookingsTable').style.display = 'none';
-                        return;
-                    }
-                    
-                    noBookings.style.display = 'none';
-                    document.getElementById('bookingsTable').style.display = 'table';
-                    
-                    // Display each upcoming booking as a table row
-                    upcomingEvents.forEach((booking, index) => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td><strong>${booking.event_type || booking['event-type'] || booking.eventType}</strong></td>
-                            <td>${booking.name}</td>
-                            <td>${booking.email}</td>
-                            <td>${booking.phone}</td>
-                            <td>${booking.event_date || booking.date}</td>
-                            <td>${booking.event_time || booking.time}</td>
-                            <td>${booking.message || '-'}</td>
-                            <td>${booking.created_at || booking.submittedAt || new Date().toLocaleString()}</td>
-                            <td><button class="delete-btn" onclick="deleteBooking(${booking.id})">Delete</button></td>
-                            <td><button class="email-btn" onclick="emailClient('${booking.email}', ${booking.id})">Send Email</button></td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading bookings:', error);
-                    alert('Error loading bookings. Make sure the server is running.');
-                });
+            const upcomingEvents = cachedBookings
+                .filter(booking => getBookingStatus(booking) === 'upcoming')
+                .sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
+
+            const tbody = document.getElementById('bookingsBody');
+            const noBookings = document.getElementById('noBookings');
+            const bookingCount = document.getElementById('bookingCount');
+            
+            tbody.innerHTML = '';
+            bookingCount.textContent = upcomingEvents.length;
+            
+            if (upcomingEvents.length === 0) {
+                noBookings.style.display = 'block';
+                document.getElementById('bookingsTable').style.display = 'none';
+                return;
+            }
+            
+            noBookings.style.display = 'none';
+            document.getElementById('bookingsTable').style.display = 'table';
+            
+            upcomingEvents.forEach((booking, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${booking.event_type || booking['event-type'] || booking.eventType}</strong></td>
+                    <td>${booking.name}</td>
+                    <td>${booking.email}</td>
+                    <td>${booking.phone}</td>
+                    <td>${booking.event_date || booking.date}</td>
+                    <td>${booking.event_time || booking.time}</td>
+                    <td>${booking.message || '-'}</td>
+                    <td>${booking.created_at || booking.submittedAt || new Date().toLocaleString()}</td>
+                    <td><button class="delete-btn" onclick="deleteBooking(${booking.id})">Delete</button></td>
+                    <td><button class="whatsapp-btn" onclick="contactWhatsApp('${booking.phone}', '${booking.name.replace(/'/g, "\\'")}')">WhatsApp</button></td>
+                    <td><button class="email-btn" onclick="emailClient('${booking.email}', ${booking.id})">Send Email</button></td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
         // Delete a specific booking
         function deleteBooking(id) {
-            alert('Delete functionality not implemented yet. Bookings are stored in server memory.');
+            if (!confirm('Are you sure you want to delete this booking?')) return;
+
+            fetch(API_BASE_URL + '/bookings/' + encodeURIComponent(id), {
+                method: 'DELETE'
+            })
+            .then(async response => {
+                const text = await response.text();
+                if (!response.ok) {
+                    let payload;
+                    try {
+                        payload = text ? JSON.parse(text) : null;
+                    } catch (parseError) {
+                        payload = null;
+                    }
+                    throw new Error((payload && payload.error) || text || 'Failed to delete booking');
+                }
+
+                if (text) {
+                    try {
+                        return JSON.parse(text);
+                    } catch (parseError) {
+                        return {};
+                    }
+                }
+
+                return {};
+            })
+            .then(() => {
+                return refreshBookingData();
+            })
+            .then(() => {
+                loadBookings();
+                loadCompletedEvents();
+                if (typeof window.renderDashboardCalendar === 'function') {
+                    window.renderDashboardCalendar();
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting booking:', error);
+                alert('Error deleting booking: ' + error.message);
+            });
+        }
+
+        // Contact client via WhatsApp
+        function contactWhatsApp(phone, customerName) {
+            // Remove any non-digit characters from phone number
+            const cleanPhone = phone.replace(/\D/g, '');
+            
+            // Check if phone number is valid
+            if (!cleanPhone) {
+                alert('Invalid phone number for this booking.');
+                return;
+            }
+            
+            // Prepare the message
+            const message = `Hello ${customerName}, it's me Ravindhar here from Nigazhi Events`;
+            
+            // Encode the message
+            const encodedMessage = encodeURIComponent(message);
+            
+            // WhatsApp Web URL format
+            const whatsappUrl = `https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
+            
+            // Open in new tab
+            window.open(whatsappUrl, '_blank');
         }
 
         // send email to client
@@ -401,6 +633,8 @@
             if (!subject) return;
             const text = prompt('Message body:', 'Thank you for your booking. We will contact you soon.');
             if (text === null) return;
+
+            const mailtoLink = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
 
             fetch(API_BASE_URL + '/send-email', {
                 method: 'POST',
@@ -426,7 +660,12 @@
             })
             .catch(err => {
                 console.error(err);
-                alert('Error sending email: ' + err.message);
+                const fallbackChoice = confirm('Email sending is not available right now. Open your email app to send this message instead?');
+                if (fallbackChoice) {
+                    window.location.href = mailtoLink;
+                } else {
+                    alert('Email sending failed: ' + err.message);
+                }
             });
         }
 
@@ -444,12 +683,6 @@
             const dateBookingsEl = document.getElementById('dateBookings');
             let current = new Date();
 
-            function getBookings() {
-                // For now, return empty array since we can't synchronously fetch
-                // In a real app, this would need to be async
-                return [];
-            }
-
             function formatMonthYear(d) {
                 return d.toLocaleString(undefined, { month: 'long', year: 'numeric' });
             }
@@ -466,36 +699,57 @@
             }
 
             function showBookingsFor(dateStr) {
-                const bookings = getBookings().filter(b => b.date === dateStr);
+                const bookings = (window.calendarBookings || []).filter(booking => {
+                    const bookingDate = new Date(booking.event_date || booking.date);
+                    return !Number.isNaN(bookingDate.getTime()) && yyyyMmDd(bookingDate) === dateStr;
+                });
+
                 if (bookings.length === 0) {
                     dateBookingsEl.innerHTML = `<div class="item">No bookings for ${dateStr}.</div>`;
                     return;
                 }
-                dateBookingsEl.innerHTML = bookings.map(b => 
-                    `<div class="item"><strong>${b.eventType}</strong> — ${b.name} (${b.phone}) at ${b.time || '-'}<br><small>${b.message || ''}</small></div>`
-                ).join('');
+
+                dateBookingsEl.innerHTML = bookings.map(booking => {
+                    const status = getBookingStatus(booking);
+                    const statusLabel = status === 'completed' ? 'Completed' : 'Upcoming';
+                    const eventType = booking.event_type || booking['event-type'] || booking.eventType || 'Event';
+                    const name = booking.name || 'Guest';
+                    const phone = booking.phone || 'N/A';
+                    const time = booking.event_time || booking.time || 'TBD';
+                    const message = booking.message || 'No message provided';
+
+                    return `
+                        <div class="item booking-item ${status}">
+                            <div class="booking-meta">
+                                <span class="status-pill ${status}">${statusLabel}</span>
+                                <strong>${eventType}</strong>
+                            </div>
+                            <div class="booking-details">${name} • ${phone}</div>
+                            <div class="booking-details">${booking.event_date || booking.date} at ${time}</div>
+                            <small>${message}</small>
+                        </div>
+                    `;
+                }).join('');
             }
 
             function renderCalendar() {
-                // remove existing date cells (keep day-name elements)
                 Array.from(calendarGrid.querySelectorAll('.date-cell')).forEach(n => n.remove());
 
                 const year = current.getFullYear();
                 const month = current.getMonth();
                 const firstDay = new Date(year, month, 1);
-                const startWeekday = firstDay.getDay(); // 0..6
+                const startWeekday = firstDay.getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
 
                 monthYearEl.textContent = formatMonthYear(current);
 
-                // add blank cells for previous month's tail
                 for (let i = 0; i < startWeekday; i++) {
                     const empty = document.createElement('div');
                     empty.className = 'date-cell inactive';
                     calendarGrid.appendChild(empty);
                 }
 
-                const bookings = getBookings();
+                const bookings = window.calendarBookings || [];
                 for (let d = 1; d <= daysInMonth; d++) {
                     const cellDate = new Date(year, month, d);
                     const dateStr = yyyyMmDd(cellDate);
@@ -503,14 +757,36 @@
                     cell.className = 'date-cell';
                     if (dateStr === yyyyMmDd(new Date())) cell.classList.add('today');
 
-                    // check if any booking exists for this date
-                    const has = bookings.some(b => b.date === dateStr);
-                    if (has) cell.classList.add('has-booking');
+                    const dayBookings = bookings.filter(booking => {
+                        const bookingDate = new Date(booking.event_date || booking.date);
+                        return !Number.isNaN(bookingDate.getTime()) && yyyyMmDd(bookingDate) === dateStr;
+                    });
 
                     cell.innerHTML = `<div class="date-num">${d}</div>`;
+
+                    if (dayBookings.length > 0) {
+                        const upcomingCount = dayBookings.filter(booking => getBookingStatus(booking) === 'upcoming').length;
+                        const completedCount = dayBookings.length - upcomingCount;
+
+                        if (upcomingCount > 0) cell.classList.add('has-upcoming');
+                        if (completedCount > 0) cell.classList.add('has-completed');
+
+                        const markers = document.createElement('div');
+                        markers.className = 'date-markers';
+
+                        if (upcomingCount > 0) {
+                            markers.insertAdjacentHTML('beforeend', `<span class="status-dot upcoming" title="${upcomingCount} upcoming event${upcomingCount === 1 ? '' : 's'}"></span>`);
+                        }
+
+                        if (completedCount > 0) {
+                            markers.insertAdjacentHTML('beforeend', `<span class="status-dot completed" title="${completedCount} completed event${completedCount === 1 ? '' : 's'}"></span>`);
+                        }
+
+                        cell.appendChild(markers);
+                    }
+
                     cell.dataset.date = dateStr;
 
-                    // click to show bookings
                     cell.addEventListener('click', function() {
                         if (cell.classList.contains('inactive')) return;
                         showBookingsFor(this.dataset.date);
@@ -528,39 +804,248 @@
             prevBtn.addEventListener('click', prevMonth);
             nextBtn.addEventListener('click', nextMonth);
 
-            // re-render calendar when bookings change (simple approach: listen storage)
+            window.renderDashboardCalendar = renderCalendar;
             window.addEventListener('storage', renderCalendar);
-
-            // initial render once DOM is ready
-            document.addEventListener('DOMContentLoaded', renderCalendar);
         })();
 
-        // Load bookings when page loads
-        document.addEventListener('DOMContentLoaded', loadBookings);
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadStatus = document.getElementById('uploadStatus');
+
+        async function loadUploadedImages() {
+            try {
+                const response = await fetch(galleryImagesEndpoint);
+                if (!response.ok) {
+                    throw new Error('Failed to load gallery images');
+                }
+
+                const images = await response.json();
+                const galleryUploadList = document.getElementById('galleryUploadList');
+                const galleryUploadCount = document.getElementById('galleryUploadCount');
+
+                if (!galleryUploadList) return;
+
+                galleryUploadList.innerHTML = '';
+                if (galleryUploadCount) {
+                    galleryUploadCount.textContent = `${images.length} uploaded`;
+                }
+
+                if (!images.length) {
+                    galleryUploadList.innerHTML = '<div class="no-messages">No gallery images uploaded yet.</div>';
+                    return;
+                }
+
+                images.forEach(image => {
+                    const card = document.createElement('div');
+                    card.className = 'gallery-upload-card';
+
+                    const img = document.createElement('img');
+                    img.src = image.url;
+                    img.alt = image.event_name || 'Uploaded gallery image';
+                    img.className = 'gallery-upload-image';
+
+                    const content = document.createElement('div');
+                    content.className = 'gallery-upload-content';
+
+                    const details = document.createElement('div');
+                    details.className = 'gallery-upload-details';
+
+                    const title = document.createElement('p');
+                    title.className = 'gallery-upload-title';
+                    title.textContent = image.event_name || 'Event Photo';
+
+                    const location = document.createElement('p');
+                    location.className = 'gallery-upload-location';
+                    location.textContent = image.event_location || 'Location not set';
+
+                    const fileName = document.createElement('p');
+                    fileName.className = 'gallery-upload-file';
+                    fileName.textContent = image.filename;
+
+                    details.appendChild(title);
+                    details.appendChild(location);
+                    details.appendChild(fileName);
+
+                    const footer = document.createElement('div');
+                    footer.className = 'gallery-upload-meta';
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.className = 'delete-img-btn';
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', () => deleteUploadedImage(image.filename));
+
+                    footer.appendChild(deleteButton);
+
+                    content.appendChild(details);
+                    content.appendChild(footer);
+
+                    card.appendChild(img);
+                    card.appendChild(content);
+                    galleryUploadList.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading gallery images:', error);
+            }
+        }
+
+        async function deleteUploadedImage(filename) {
+            if (!confirm('Are you sure you want to delete this gallery image?')) return;
+
+            try {
+                const response = await fetch('/images/' + encodeURIComponent(filename), {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Failed to delete image');
+                }
+
+                await loadUploadedImages();
+            } catch (error) {
+                console.error('Error deleting gallery image:', error);
+                alert('Error deleting image: ' + error.message);
+            }
+        }
+
+        const testimonialForm = document.getElementById('testimonialForm');
+        const testimonialStatus = document.getElementById('testimonialStatus');
+
+        if (testimonialForm) {
+            testimonialForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const name = document.getElementById('testimonialName').value.trim();
+                const message = document.getElementById('testimonialMessage').value.trim();
+                const rating = Number(document.getElementById('testimonialRating').value);
+
+                if (!name || !message) return;
+
+                const testimonials = JSON.parse(localStorage.getItem(testimonialsStorageKey)) || [];
+                const newTestimonial = {
+                    id: Date.now(),
+                    name,
+                    message,
+                    rating,
+                    created_at: new Date().toLocaleString()
+                };
+
+                testimonials.unshift(newTestimonial);
+                localStorage.setItem(testimonialsStorageKey, JSON.stringify(testimonials));
+
+                testimonialForm.reset();
+                loadTestimonials();
+
+                if (testimonialStatus) {
+                    testimonialStatus.textContent = '✅Testimonial added successfully';
+                    testimonialStatus.style.display = 'block';
+                }
+            });
+        }
+
+        const testimonialsStorageKey = 'adminTestimonials';
+
+        function loadTestimonials() {
+            const container = document.getElementById('testimonialsContainer');
+            const countEl = document.getElementById('testimonialCount');
+            const statusEl = document.getElementById('testimonialStatus');
+
+            if (!container || !countEl) return;
+
+            const testimonials = JSON.parse(localStorage.getItem(testimonialsStorageKey)) || [];
+            countEl.textContent = testimonials.length;
+
+            if (testimonials.length === 0) {
+                container.innerHTML = '<div class="no-messages">No testimonials added yet.</div>';
+                return;
+            }
+
+            container.innerHTML = testimonials.map((item) => {
+                const stars = '★'.repeat(Number(item.rating || 5)) + '☆'.repeat(Math.max(0, 5 - Number(item.rating || 5)));
+                return `
+                    <div class="message-card">
+                        <div class="message-header">
+                            <strong>${item.name}</strong>
+                            <button class="delete-msg-btn" onclick="deleteTestimonial(${item.id})">Delete</button>
+                        </div>
+                        <div class="message-details">
+                            <p class="message-text">${item.message}</p>
+                            <p><strong>Rating:</strong> ${stars} (${item.rating || 5}/5)</p>
+                            <small><strong>Added:</strong> ${item.created_at || 'Just now'}</small>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (statusEl) {
+                statusEl.style.display = 'none';
+                statusEl.textContent = '';
+            }
+        }
+
+        function deleteTestimonial(id) {
+            const testimonials = JSON.parse(localStorage.getItem(testimonialsStorageKey)) || [];
+            const filtered = testimonials.filter(item => Number(item.id) !== Number(id));
+            localStorage.setItem(testimonialsStorageKey, JSON.stringify(filtered));
+            loadTestimonials();
+        }
+
+        window.deleteTestimonial = deleteTestimonial;
+
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (uploadStatus) {
+                    uploadStatus.style.display = 'none';
+                    uploadStatus.textContent = '';
+                }
+
+                const formData = new FormData(uploadForm);
+
+                try {
+                    const response = await fetch(uploadEndpoint, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText || 'Upload failed');
+                    }
+
+                    if (uploadStatus) {
+                        uploadStatus.textContent = '✅Image uploaded successfully';
+                        uploadStatus.style.display = 'block';
+
+                        if (uploadStatus._hideTimer) {
+                            clearTimeout(uploadStatus._hideTimer);
+                        }
+
+                        uploadStatus._hideTimer = setTimeout(() => {
+                            uploadStatus.style.display = 'none';
+                            uploadStatus.textContent = '';
+                        }, 8000);
+                    }
+                    uploadForm.reset();
+                    await loadUploadedImages();
+                } catch (error) {
+                    if (uploadStatus) {
+                        uploadStatus.textContent = 'Upload failed. Please try again.';
+                        uploadStatus.style.display = 'block';
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await refreshBookingData();
+                loadBookings();
+                loadCompletedEvents();
+                loadTestimonials();
+            } catch (error) {
+                console.error('Error loading bookings on page load:', error);
+            }
+        });
     </script>
-
-    <div class="uploading">
-        <center>
-            <h2>Upload Image</h2>
-            <form id="uploadForm" enctype="multipart/form-data">
-            <input type="file" name="image" required />
-            <button type="submit">Upload</button>
-            </form>
-        </center>
-    </div>
-<script>
-document.getElementById("uploadForm").addEventListener("submit", async function(e) {
-  e.preventDefault();
-
-  const formData = new FormData(this);
-
-  await fetch("/upload", {
-    method: "POST",
-    body: formData
-  });
-
-  alert("Image Uploaded Successfully 🔥");
-});
-</script>
 </body>
 </html>

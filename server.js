@@ -169,6 +169,39 @@ app.get('/bookings', async (req, res) => {
     res.json(data);
 });
 
+// DELETE route for admin - remove a booking by id
+app.delete('/bookings/:id', async (req, res) => {
+    const bookingId = req.params.id;
+
+    if (!bookingId) {
+        return res.status(400).json({ error: 'Booking id is required' });
+    }
+
+    const { data, error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', bookingId)
+        .select();
+
+    if (error) {
+        console.error('Delete booking error:', error);
+        return res.status(500).json({
+            error: 'Failed to delete booking'
+        });
+    }
+
+    if (!data || data.length === 0) {
+        return res.status(404).json({
+            error: 'Booking not found'
+        });
+    }
+
+    res.json({
+        message: 'Booking deleted successfully',
+        booking: data[0]
+    });
+});
+
 /*
 app.get('/bookings', (req, res) => {
     const sql = "SELECT * FROM bookings ORDER BY event_date DESC";
@@ -262,6 +295,35 @@ app.get('/contact-messages', async (req, res) => {
     res.json(data);
 });
 
+// DELETE route for admin - remove a contact message by id
+app.delete('/contact-messages/:id', async (req, res) => {
+    const messageId = req.params.id;
+
+    const { data, error } = await supabase
+        .from('contact_messages')
+        .delete()
+        .eq('id', messageId)
+        .select();
+
+    if (error) {
+        console.error('Delete contact message error:', error);
+        return res.status(500).json({
+            error: 'Failed to delete message'
+        });
+    }
+
+    if (!data || data.length === 0) {
+        return res.status(404).json({
+            error: 'Message not found'
+        });
+    }
+
+    res.json({
+        message: 'Message deleted successfully',
+        contactMessage: data[0]
+    });
+});
+
 
 /*
 app.get('/contact-messages', (req, res) => {
@@ -305,9 +367,14 @@ app.post('/send-email', (req, res) => {
 const multer = require("multer");
 const fs = require("fs");
 
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -317,17 +384,96 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.post("/upload", upload.single("image"), (req, res) => {
-  res.json({ message: "Image uploaded successfully" });
+  if (!req.file) {
+    return res.status(400).json({ error: 'Image file is required' });
+  }
+
+  const eventName = (req.body.event_name || '').trim();
+  const eventLocation = (req.body.event_location || '').trim();
+
+  const metadata = {
+    event_name: eventName,
+    event_location: eventLocation,
+    uploaded_at: new Date().toISOString()
+  };
+
+  const metadataPath = path.join(uploadDir, `${req.file.filename}.json`);
+  fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
+
+  res.json({
+    message: 'Image uploaded successfully',
+    file: req.file.filename,
+    event_name: eventName,
+    event_location: eventLocation
+  });
 });
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.delete('/images/:filename', (req, res) => {
+  const filename = path.basename(req.params.filename);
+  const filePath = path.join(uploadDir, filename);
+
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+
+    fs.unlink(filePath, (unlinkErr) => {
+      if (unlinkErr) {
+        console.error('Failed to delete image:', unlinkErr);
+        return res.status(500).json({ error: 'Failed to delete image' });
+      }
+
+      const metadataFile = path.join(uploadDir, `${filename}.json`);
+      fs.unlink(metadataFile, (metadataErr) => {
+        if (metadataErr && metadataErr.code !== 'ENOENT') {
+          console.error('Failed to delete image metadata:', metadataErr);
+        }
+
+        res.json({ message: 'Image deleted successfully', filename });
+      });
+    });
+  });
+});
+
+app.use("/uploads", express.static(uploadDir));
 
 app.get("/images", (req, res) => {
-  fs.readdir(path.join(__dirname, "uploads"), (err, files) => {
+  fs.readdir(uploadDir, (err, files) => {
     if (err) return res.status(500).json({ error: "Unable to read folder" });
 
-    const imageUrls = files.map(file => `/uploads/${file}`);
+    const imageUrls = files
+      .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file))
+      .map(file => `/uploads/${file}`);
+
     res.json(imageUrls);
+  });
+});
+
+app.get('/images/details', (req, res) => {
+  fs.readdir(uploadDir, (err, files) => {
+    if (err) return res.status(500).json({ error: 'Unable to read folder' });
+
+    const imageEntries = files
+      .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file))
+      .map(file => {
+        const metadataPath = path.join(uploadDir, `${file}.json`);
+        let metadata = {};
+
+        try {
+          metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+        } catch (readErr) {
+          metadata = {};
+        }
+
+        return {
+          filename: file,
+          url: `/uploads/${file}`,
+          event_name: metadata.event_name || '',
+          event_location: metadata.event_location || ''
+        };
+      });
+
+    res.json(imageEntries);
   });
 });
 
